@@ -39,6 +39,19 @@ class Atividades(Base):
     pessoa_id = Column(Integer, ForeignKey('pessoas.id')) #aqui não é o nome da classe, é o nome da tabela, por isso é pessoas e não Pessoas
     pessoa = relationship("Pessoas") #classe Pessoas. Vai reconhecer que tem relacionamento de atividades com pessoas
 
+#quando mandar imprimir objeto ele vai mandar o que tem nessa função. repr = representação da classe
+    def __repr__(self):
+        return '<Atividades {}>'.format(self.nome) #vai imprimir a pessoa e o nome da pessoa
+
+    #com esse método pode retirar do arquivo utils o db_session do import. Pq chama o método da própria classe
+    def save(self):
+        db_session.add(self)
+        db_session.commit()
+
+    def delete(self):
+        db_session.delete(self)
+        db_session.commit()
+
 def init_db():
     Base.metadata.create_all(bind=engine) #esse comando create_all que vai criar o banco de dados
 
