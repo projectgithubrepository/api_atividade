@@ -1,11 +1,36 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from models import Pessoas, Atividades
+from models import Pessoas, Atividades, Usuarios
+from flask_httpauth import HTTPBasicAuth #é para autenticação. Usuário/senha
 
+auth = HTTPBasicAuth() #é para autenticação. Usuário/senha
 app = Flask(__name__)
 api = Api(app)
 
+# USUARIOS = {
+#     'Daniel':'321',
+#     'Thor':'321'
+# }
+
+# #essa função é a verificadora de senha
+# @auth.verify_password
+# def verificacao(login, senha):
+#     print('validando o usuario')
+#     print(USUARIOS.get(login) == senha)
+#     if not (login, senha):
+#         return False
+#     return USUARIOS.get(login) == senha
+
+# #essa função é a verificadora de senha. Aqui importando do arquivo models classes e métodos
+#aqui temos um RestAPI com autentificação. Só acessa logado. Os dados de usuário e senha estão no arquivo utils.py
+@auth.verify_password
+def verificacao(login, senha):
+    if not (login, senha):
+        return False
+    return Usuarios.query.filter_by(login=login, senha=senha).first()
+
 class Pessoa(Resource):
+    @auth.login_required #ou seja, para acessar esse método get é preciso estar logado
     def get(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
         try:
@@ -52,6 +77,7 @@ class Pessoa(Resource):
 
 #retorna tudo de um DB. Não é aconselhável fazer sem filtro, por motivo de travar pela quantidade de dados.
 class ListaPessoas(Resource):
+    @auth.login_required
     def get(self):
         pessoas = Pessoas.query.all()
         #response = [i for i in pessoas] #como é um objeto precisa transformar em lista, por isso essa linha é substituído por
